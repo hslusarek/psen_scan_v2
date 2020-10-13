@@ -23,7 +23,8 @@ ControllerStateMachine::ControllerStateMachine(const MonitoringFrameCallback& mo
                                                const SendRequestCallback& start_request_cb,
                                                const SendRequestCallback& stop_request_cb,
                                                const StartedCallback& started_cb,
-                                               const StoppedCallback& stopped_cb)
+                                               const StoppedCallback& stopped_cb,
+                                               const LeavingWaitForStartReplyCallback& leave_start_reply_cb)
   : sm_(monitoring_frame_cb, start_request_cb, stop_request_cb, started_cb, stopped_cb)
 {
   const std::lock_guard<std::mutex> lock(sm_access_mutex_);

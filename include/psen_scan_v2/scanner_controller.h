@@ -24,6 +24,7 @@
 #include <string>
 #include <future>
 #include <sstream>
+#include <mutex>
 
 #include <gtest/gtest_prod.h>
 
@@ -83,6 +84,9 @@ private:
   TUCI control_udp_client_;
   TUCI data_udp_client_;
 
+  // The watchdog pointer is changed by the user-main-thread and by the UDP client callback-thread/io-service-thread,
+  // and, therefore, needs to be protected/sychronized via mutex.
+  std::mutex watchdog_mutex_;
   std::unique_ptr<Watchdog> start_reply_watchdog_{};
 
   LaserScanCallback laser_scan_callback_;
@@ -111,7 +115,8 @@ ScannerControllerT<TCSM, TUCI>::ScannerControllerT(const ScannerConfiguration& s
                    std::bind(&ScannerControllerT::sendStartRequest, this),
                    std::bind(&ScannerControllerT::sendStopRequest, this),
                    std::bind(&ScannerControllerT::notifyStartedState, this),
-                   std::bind(&ScannerControllerT::notifyStoppedState, this))
+                   std::bind(&ScannerControllerT::notifyStoppedState, this),
+                   nullptr)
   , control_udp_client_(
         std::bind(&ScannerControllerT::handleScannerReply, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&ScannerControllerT::handleError, this, std::placeholders::_1),
@@ -179,6 +184,7 @@ void ScannerControllerT<TCSM, TUCI>::sendStartRequest()
 {
   if (!start_reply_watchdog_)
   {
+    const std::lock_guard<std::mutex> lock(watchdog_mutex_);
     start_reply_watchdog_ = std::make_unique<Watchdog>(RECEIVE_TIMEOUT_CONTROL,
                                                        std::bind(&ScannerControllerT::handleStartReplyTimeout, this));
   }
@@ -211,6 +217,13 @@ void ScannerControllerT<TCSM, TUCI>::handleStopReplyTimeout(const std::string& e
 template <typename TCSM, typename TUCI>
 void ScannerControllerT<TCSM, TUCI>::sendStopRequest()
 {
+  // Before we send the stop request, we need to ensure that an potentially running start()-loop is stopped.
+  {
+    const std::lock_guard<std::mutex> lock(watchdog_mutex_);
+    // The reset stops the start-reply timeout timer
+    start_reply_watchdog_.reset(nullptr);
+  }
+
   control_udp_client_.startAsyncReceiving(
       ReceiveMode::single, std::bind(&ScannerControllerT::handleStopReplyTimeout, this, _1), RECEIVE_TIMEOUT_CONTROL);
   StopRequest stop_request;
@@ -222,8 +235,11 @@ void ScannerControllerT<TCSM, TUCI>::notifyStartedState()
 {
   PSENSCAN_DEBUG("ScannerController", "Started() called.");
 
-  // The reset stops the start-reply timeout timer
-  start_reply_watchdog_.reset(nullptr);
+  {
+    const std::lock_guard<std::mutex> lock(watchdog_mutex_);
+    // The reset stops the start-reply timeout timer
+    start_reply_watchdog_.reset(nullptr);
+  }
 
   started_.set_value();
   // Reinitialize

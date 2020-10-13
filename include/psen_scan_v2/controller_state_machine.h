@@ -32,7 +32,8 @@ public:
                                   const SendRequestCallback& start_request_cb,
                                   const SendRequestCallback& stop_request_cb,
                                   const StartedCallback& started_cb,
-                                  const StoppedCallback& stopped_cb);
+                                  const StoppedCallback& stopped_cb,
+                                  const LeavingWaitForStartReplyCallback& leave_start_reply_cb);
   virtual ~ControllerStateMachine();
 
   void processStartRequestEvent();

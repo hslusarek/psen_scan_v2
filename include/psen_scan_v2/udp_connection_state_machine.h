@@ -50,6 +50,7 @@ using MonitoringFrameCallback = std::function<void(const MonitoringFrameMsg& msg
 using SendRequestCallback = std::function<void()>;
 using StartedCallback = std::function<void()>;
 using StoppedCallback = std::function<void()>;
+using LeavingWaitForStartReplyCallback = std::function<void()>;
 
 // front-end: define the FSM structure
 /**
@@ -62,11 +63,13 @@ struct udp_connection_state_machine_ : public msm::front::state_machine_def<udp_
                                 const SendRequestCallback& stop_request_cb,
                                 const StartedCallback& started_cb,
                                 const StoppedCallback& stopped_cb)
+                                //const LeavingWaitForStartReplyCallback& leave_start_reply_cb)
     : monitoring_frame_callback_(monitoring_frame_cb)
     , send_start_request_callback_(start_request_cb)
     , send_stop_request_callback_(stop_request_cb)
     , notify_started_callback_(started_cb)
     , notify_stopped_callback_(stopped_cb)
+    //, leave_start_reply_cb_(leave_start_reply_cb)
   {
   }
 
@@ -75,6 +78,7 @@ struct udp_connection_state_machine_ : public msm::front::state_machine_def<udp_
   SendRequestCallback send_stop_request_callback_;
   StoppedCallback notify_started_callback_;
   StoppedCallback notify_stopped_callback_;
+  LeavingWaitForStartReplyCallback leave_start_reply_cb_;
 
   struct events
   {
@@ -119,9 +123,13 @@ struct udp_connection_state_machine_ : public msm::front::state_machine_def<udp_
         PSENSCAN_DEBUG("StateMachine", "Entering: WaitForStartReplyState");
       }
       template <class Event,class FSM>
-      void on_exit(Event const&,FSM& )
+      void on_exit(Event const&,FSM& fsm)
       {
         PSENSCAN_DEBUG("StateMachine", "Leaving: WaitForStartReplyState");
+        if (fsm.leave_start_reply_cb_)
+        {
+          fsm.leave_start_reply_cb_();
+        }
       }
     };
 
