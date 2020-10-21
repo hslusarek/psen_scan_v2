@@ -142,12 +142,12 @@ void ScannerMock::sendReply(const uint32_t reply_type)
 void ScannerMock::sendStartReply()
 {
   std::cout << "ScannerMock: Send start reply..." << std::endl;
-  sendReply(getOpCodeValue(ScannerReplyMsgType::Start));
+  sendReply(getOpCodeValue(ScannerReplyMsgType::start));
 }
 
 void ScannerMock::sendStopReply()
 {
-  sendReply(getOpCodeValue(ScannerReplyMsgType::Stop));
+  sendReply(getOpCodeValue(ScannerReplyMsgType::stop));
 }
 
 void ScannerMock::sendMonitoringFrame(const MonitoringFrameMsg& msg)
@@ -316,7 +316,7 @@ TEST(ScannerAPITests, testReceivingOfMonitoringFrame)
   ScannerV2 scanner(config, std::bind(&UserCallbacks::LaserScanCallback, &cb, std::placeholders::_1));
 
   MonitoringFrameMsg msg(
-      TenthOfDegree(0), TenthOfDegree(1), 0, { 1, 2, 3, 4, 5 }, { { ScannerId::MASTER, ErrorLocation(1, 7) } });
+      TenthOfDegree(0), TenthOfDegree(1), 0, { 1, 2, 3, 4, 5 }, { { ScannerId::master, ErrorLocation(1, 7) } });
   Barrier monitoring_frame_barrier;
   Barrier diagnostic_barrier;
   {
