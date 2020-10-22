@@ -40,66 +40,65 @@ StartRequest::StartRequest(const ScannerConfiguration& scanner_configuration, co
   {
     diagnostics_enabled_ = 0b00001000;
   }
-  crc_ = calculateCRC();
 }
 
-uint32_t StartRequest::calculateCRC() const
-{
-  boost::crc_32_type result;
+// uint32_t StartRequest::calculateCRC() const
+// {
+//   boost::crc_32_type result;
 
-  DynamicSizeRawData raw_data{ serialize() };
+//   DynamicSizeRawData raw_data{ serialize() };
 
-  result.process_bytes(&raw_data.at(sizeof(crc_)), raw_data.size() - sizeof(crc_));
+//   result.process_bytes(&raw_data.at(sizeof(crc_)), raw_data.size() - sizeof(crc_));
 
-  return result.checksum();
-}
+//   return result.checksum();
+// }
 
-DynamicSizeRawData StartRequest::serialize() const
-{
-  std::ostringstream os;
+// DynamicSizeRawData StartRequest::serialize() const
+// {
+//   std::ostringstream os;
 
-  raw_processing::write(os, crc_);
-  raw_processing::write(os, seq_number_);
-  raw_processing::write(os, RESERVED_);
-  raw_processing::write(os, OPCODE_);
+//   raw_processing::write(os, crc_);
+//   raw_processing::write(os, seq_number_);
+//   raw_processing::write(os, RESERVED_);
+//   raw_processing::write(os, OPCODE_);
 
-  uint32_t host_ip_big_endian = htobe32(host_ip_);
-  raw_processing::write(os, host_ip_big_endian);
+//   uint32_t host_ip_big_endian = htobe32(host_ip_);
+//   raw_processing::write(os, host_ip_big_endian);
 
-  raw_processing::write(os, host_udp_port_data_);
-  raw_processing::write(os, device_enabled_);
-  raw_processing::write(os, intensity_enabled_);
-  raw_processing::write(os, point_in_safety_enabled_);
-  raw_processing::write(os, active_zone_set_enabled_);
-  raw_processing::write(os, io_pin_enabled_);
-  raw_processing::write(os, scan_counter_enabled_);
-  raw_processing::write(os, speed_encoder_enabled_);
-  raw_processing::write(os, diagnostics_enabled_);
+//   raw_processing::write(os, host_udp_port_data_);
+//   raw_processing::write(os, device_enabled_);
+//   raw_processing::write(os, intensity_enabled_);
+//   raw_processing::write(os, point_in_safety_enabled_);
+//   raw_processing::write(os, active_zone_set_enabled_);
+//   raw_processing::write(os, io_pin_enabled_);
+//   raw_processing::write(os, scan_counter_enabled_);
+//   raw_processing::write(os, speed_encoder_enabled_);
+//   raw_processing::write(os, diagnostics_enabled_);
 
-  uint16_t start_angle{ master_.getScanRange().getStart().value() };
-  uint16_t end_angle{ master_.getScanRange().getEnd().value() };
-  uint16_t resolution{ master_.getResolution().value() };
-  raw_processing::write(os, start_angle);
-  raw_processing::write(os, end_angle);
-  raw_processing::write(os, resolution);
+//   uint16_t start_angle{ master_.getScanRange().getStart().value() };
+//   uint16_t end_angle{ master_.getScanRange().getEnd().value() };
+//   uint16_t resolution{ master_.getResolution().value() };
+//   raw_processing::write(os, start_angle);
+//   raw_processing::write(os, end_angle);
+//   raw_processing::write(os, resolution);
 
-  for (const auto& slave : slaves_)
-  {
-    uint16_t slave_start_angle{ slave.getScanRange().getStart().value() };
-    uint16_t slave_end_angle{ slave.getScanRange().getEnd().value() };
-    uint16_t slave_resolution{ slave.getResolution().value() };
-    raw_processing::write(os, slave_start_angle);
-    raw_processing::write(os, slave_end_angle);
-    raw_processing::write(os, slave_resolution);
-  }
+//   for (const auto& slave : slaves_)
+//   {
+//     uint16_t slave_start_angle{ slave.getScanRange().getStart().value() };
+//     uint16_t slave_end_angle{ slave.getScanRange().getEnd().value() };
+//     uint16_t slave_resolution{ slave.getResolution().value() };
+//     raw_processing::write(os, slave_start_angle);
+//     raw_processing::write(os, slave_end_angle);
+//     raw_processing::write(os, slave_resolution);
+//   }
 
-  std::string data_str(os.str());
+//   std::string data_str(os.str());
 
-  DynamicSizeRawData raw_data;
-  raw_data.reserve(data_str.length());
-  assert(data_str.length() == START_REQUEST_SIZE && "Message data of start request has not the expected size");
-  std::copy(data_str.begin(), data_str.end(), std::back_inserter(raw_data));
+//   DynamicSizeRawData raw_data;
+//   raw_data.reserve(data_str.length());
+//   assert(data_str.length() == START_REQUEST_SIZE && "Message data of start request has not the expected size");
+//   std::copy(data_str.begin(), data_str.end(), std::back_inserter(raw_data));
 
-  return raw_data;
-}
+//   return raw_data;
+// }
 }  // namespace psen_scan_v2

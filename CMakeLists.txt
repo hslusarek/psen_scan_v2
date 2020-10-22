@@ -101,6 +101,7 @@ set(${PROJECT_NAME}_sources
   src/laserscan.cpp
   src/monitoring_frame_msg.cpp
   src/start_request.cpp
+  src/start_request_serialization.cpp
   src/stop_request.cpp
   src/scanner_configuration.cpp
   src/monitoring_frame_deserialization.cpp
@@ -190,6 +191,7 @@ if(CATKIN_ENABLE_TESTING)
     test/unit_tests/unittest_start_request.cpp
     src/start_request.cpp
     src/scanner_configuration.cpp
+    src/start_request_serialization.cpp
   )
   target_link_libraries(unittest_start_request
     ${catkin_LIBRARIES}

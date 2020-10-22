@@ -44,13 +44,10 @@ public:
    */
   StartRequest(const ScannerConfiguration& scanner_configuration, const uint32_t& seq_number);
 
-  //! @returns the CRC of the start request.
-  uint32_t calculateCRC() const;
-
-  DynamicSizeRawData serialize() const;
+  // DynamicSizeRawData serialize() const;
+  friend DynamicSizeRawData serialize(const StartRequest& frame);
 
 private:
-  uint32_t crc_{ 0 }; /**< Will be filled in constructor */
   uint32_t seq_number_;
   uint64_t const RESERVED_{ 0 };           /**< Use all zeros */
   uint32_t const OPCODE_{ htole32(0x35) }; /**< Constant 0x35. */
@@ -71,12 +68,12 @@ private:
   uint8_t speed_encoder_enabled_{ 0 }; /**< 0000000bin disabled, 00001111bin enabled.*/
   uint8_t diagnostics_enabled_{ 0b00000000 };
 
-  class DeviceSettings
+  class LaserScanSettings
   {
   public:
-    DeviceSettings() = default;
+    LaserScanSettings() = default;
 
-    DeviceSettings(const DefaultScanRange& scan_range, const TenthOfDegree resolution)
+    LaserScanSettings(const DefaultScanRange& scan_range, const TenthOfDegree resolution)
       : scan_range_(scan_range), resolution_(resolution)
     {
     }
@@ -97,8 +94,8 @@ private:
     TenthOfDegree resolution_{ 0 };
   };
 
-  DeviceSettings master_;
-  std::array<DeviceSettings, 3> slaves_;
+  LaserScanSettings master_;
+  std::array<LaserScanSettings, 3> slaves_;
 };
 
 }  // namespace psen_scan_v2

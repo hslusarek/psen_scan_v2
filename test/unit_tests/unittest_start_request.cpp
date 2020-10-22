@@ -73,7 +73,7 @@ TEST_F(StartRequestTest, constructorTest)
   uint32_t sequence_number{ 123 };
   StartRequest sr(sc, sequence_number);
 
-  auto data = sr.serialize();
+  auto data = serialize(sr);
   boost::crc_32_type result;
   result.process_bytes(&data[sizeof(uint32_t)], data.size() - sizeof(uint32_t));
 

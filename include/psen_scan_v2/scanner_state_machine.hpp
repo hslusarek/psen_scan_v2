@@ -78,7 +78,7 @@ template <class T>
 inline void ScannerProtocolDef::sendStartRequest(const T& event)
 {
   PSENSCAN_DEBUG("StateMachine", "Action: sendStartRequest");
-  args_->control_client_->write(StartRequest(args_->config_, DEFAULT_SEQ_NUMBER).serialize());
+  args_->control_client_->write(serialize(StartRequest(args_->config_, DEFAULT_SEQ_NUMBER)));
 }
 
 inline void ScannerProtocolDef::sendStopRequest(const scanner_events::StopRequest& event)
