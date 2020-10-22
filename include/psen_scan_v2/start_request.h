@@ -22,11 +22,10 @@
 #include "psen_scan_v2/scanner_configuration.h"
 #include "psen_scan_v2/raw_scanner_data.h"
 #include "psen_scan_v2/scan_range.h"
+#include "psen_scan_v2/scanner_ids.h"
 
 namespace psen_scan_v2
 {
-static constexpr std::size_t START_REQUEST_SIZE{ 58 };  // See protocol description
-
 /**
  * @brief Higher level data type representing a scanner start request.
  *
@@ -44,29 +43,12 @@ public:
    */
   StartRequest(const ScannerConfiguration& scanner_configuration, const uint32_t& seq_number);
 
-  // DynamicSizeRawData serialize() const;
-  friend DynamicSizeRawData serialize(const StartRequest& frame);
+  friend DynamicSizeRawData psen_scan_v2::serialize(const StartRequest& frame);
 
 private:
   uint32_t seq_number_;
-  uint64_t const RESERVED_{ 0 };           /**< Use all zeros */
-  uint32_t const OPCODE_{ htole32(0x35) }; /**< Constant 0x35. */
-  uint32_t host_ip_;                       /**< Byte order: big endian */
-  uint16_t host_udp_port_data_;            /**< Byte order: big endian */
-
-  /**< The following 'enable' fields are a 1-byte mask each.
-   * Only the last 4 bits (little endian) are used, each of which represents a device.
-   * For example, (1000) only enables the Master device, while (1010) enables both the Master
-   * and the second Slave device.
-   */
-  uint8_t device_enabled_{ 0b00001000 };
-  uint8_t intensity_enabled_{ 0 };
-  uint8_t point_in_safety_enabled_{ 0 };
-  uint8_t active_zone_set_enabled_{ 0 };
-  uint8_t io_pin_enabled_{ 0 };
-  uint8_t scan_counter_enabled_{ 0b00001000 };
-  uint8_t speed_encoder_enabled_{ 0 }; /**< 0000000bin disabled, 00001111bin enabled.*/
-  uint8_t diagnostics_enabled_{ 0b00000000 };
+  uint32_t host_ip_;
+  uint16_t host_udp_port_data_;
 
   class LaserScanSettings
   {
@@ -92,6 +74,60 @@ private:
   private:
     const DefaultScanRange scan_range_{};
     TenthOfDegree resolution_{ 0 };
+  };
+  class DeviceSettings
+  {
+  public:
+    DeviceSettings(ScannerId id,
+                   bool device_enabled,
+                   bool intensity_enabled,
+                   bool scan_counter_enabled,
+                   bool diagnostics_enabled)
+      : id_(id)
+      , device_enabled_(device_enabled)
+      , intensity_enabled_(intensity_enabled)
+      , point_in_safety_enabled_(false)
+      , active_zone_set_enabled_(false)
+      , io_pin_enabled_(false)
+      , scan_counter_enabled_(scan_counter_enabled)
+      , speed_encoder_enabled_(false)
+      , diagnostics_enabled_(diagnostics_enabled)
+    {
+    }
+
+  public:
+    bool getDeviceEnabled() const
+    {
+      return device_enabled_;
+    };
+
+    bool getDiagnosticsEnabled() const
+    {
+      return diagnostics_enabled_;
+    };
+
+    void setDiagnosticsEnabled(bool value)
+    {
+      diagnostics_enabled_ = value;
+    };
+
+  private:
+    ScannerId id_;
+    bool device_enabled_;
+    bool intensity_enabled_;
+    bool point_in_safety_enabled_;
+    bool active_zone_set_enabled_;
+    bool io_pin_enabled_;
+    bool scan_counter_enabled_;
+    bool speed_encoder_enabled_;
+    bool diagnostics_enabled_;
+  };
+
+  DeviceSettings device_settings_master_{ DeviceSettings(ScannerId::MASTER, true, false, true, true) };
+  std::array<DeviceSettings, 3> device_settings_slaves_{
+    DeviceSettings(ScannerId::SLAVE0, false, false, false, false),
+    DeviceSettings(ScannerId::SLAVE1, false, false, false, false),
+    DeviceSettings(ScannerId::SLAVE2, false, false, false, false)
   };
 
   LaserScanSettings master_;

@@ -174,7 +174,7 @@ TEST(ScannerAPITests, testStartFunctionality)
   const StartRequest start_req(config, DEFAULT_SEQ_NUMBER);
 
   Barrier start_req_received_barrier;
-  EXPECT_CALL(scanner_mock, receiveControlMsg(_, start_req.serialize()))
+  EXPECT_CALL(scanner_mock, receiveControlMsg(_, serialize(start_req)))
       .WillOnce(OpenBarrier(&start_req_received_barrier));
 
   scanner_mock.startListeningForControlMsg();
@@ -197,7 +197,7 @@ TEST(ScannerAPITests, shouldThrowWhenStartIsCalledTwice)
   ScannerV2 scanner(config, std::bind(&UserCallbacks::LaserScanCallback, &cb, std::placeholders::_1));
 
   Barrier start_req_received_barrier;
-  ON_CALL(scanner_mock, receiveControlMsg(_, StartRequest(config, DEFAULT_SEQ_NUMBER).serialize()))
+  ON_CALL(scanner_mock, receiveControlMsg(_, serialize(StartRequest(config, DEFAULT_SEQ_NUMBER))))
       .WillByDefault(OpenBarrier(&start_req_received_barrier));
 
   scanner_mock.startListeningForControlMsg();
@@ -213,7 +213,7 @@ TEST(ScannerAPITests, startShouldSucceedDespiteUnexpectedMonitoringFrame)
   ScannerV2 scanner(config, std::bind(&UserCallbacks::LaserScanCallback, &cb, std::placeholders::_1));
 
   Barrier start_req_received_barrier;
-  ON_CALL(scanner_mock, receiveControlMsg(_, StartRequest(config, DEFAULT_SEQ_NUMBER).serialize()))
+  ON_CALL(scanner_mock, receiveControlMsg(_, serialize(StartRequest(config, DEFAULT_SEQ_NUMBER))))
       .WillByDefault(OpenBarrier(&start_req_received_barrier));
   EXPECT_CALL(cb, LaserScanCallback(_)).Times(0);
 
@@ -236,7 +236,7 @@ TEST(ScannerAPITests, testStopFunctionality)
   UserCallbacks cb;
   ScannerV2 scanner(config, std::bind(&UserCallbacks::LaserScanCallback, &cb, std::placeholders::_1));
 
-  EXPECT_CALL(scanner_mock, receiveControlMsg(_, StartRequest(config, DEFAULT_SEQ_NUMBER).serialize()))
+  EXPECT_CALL(scanner_mock, receiveControlMsg(_, serialize(StartRequest(config, DEFAULT_SEQ_NUMBER))))
       .WillOnce(InvokeWithoutArgs([&scanner_mock]() { scanner_mock.sendStartReply(); }));
 
   Barrier stop_req_received_barrier;
@@ -266,7 +266,7 @@ TEST(ScannerAPITests, shouldThrowWhenStopIsCalledTwice)
   UserCallbacks cb;
   ScannerV2 scanner(config, std::bind(&UserCallbacks::LaserScanCallback, &cb, std::placeholders::_1));
 
-  EXPECT_CALL(scanner_mock, receiveControlMsg(_, StartRequest(config, DEFAULT_SEQ_NUMBER).serialize()))
+  EXPECT_CALL(scanner_mock, receiveControlMsg(_, serialize(StartRequest(config, DEFAULT_SEQ_NUMBER))))
       .WillOnce(InvokeWithoutArgs([&scanner_mock]() { scanner_mock.sendStartReply(); }));
 
   Barrier stop_req_received_barrier;
@@ -322,7 +322,7 @@ TEST(ScannerAPITests, testReceivingOfMonitoringFrame)
   {
     InSequence seq;
 
-    EXPECT_CALL(scanner_mock, receiveControlMsg(_, StartRequest(config, DEFAULT_SEQ_NUMBER).serialize()))
+    EXPECT_CALL(scanner_mock, receiveControlMsg(_, serialize(StartRequest(config, DEFAULT_SEQ_NUMBER))))
         .WillOnce(InvokeWithoutArgs([&scanner_mock]() { scanner_mock.sendStartReply(); }));
 
     // Check that toLaserScan(msg) == arg
@@ -359,7 +359,7 @@ TEST(ScannerAPITests, shouldNotCallLaserscanCallbackInCaseOfEmptyMonitoringFrame
   {
     InSequence seq;
 
-    EXPECT_CALL(scanner_mock, receiveControlMsg(_, StartRequest(config, DEFAULT_SEQ_NUMBER).serialize()))
+    EXPECT_CALL(scanner_mock, receiveControlMsg(_, serialize(StartRequest(config, DEFAULT_SEQ_NUMBER))))
         .WillOnce(InvokeWithoutArgs([&scanner_mock]() { scanner_mock.sendStartReply(); }));
 
     EXPECT_CALL(cb, LaserScanCallback(_)).WillOnce(OpenBarrier(&monitoring_frame_barrier));

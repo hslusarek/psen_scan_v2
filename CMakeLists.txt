@@ -333,6 +333,7 @@ catkin_add_gmock(integrationtest_scanner_api
   src/start_request.cpp
   src/stop_request.cpp
   src/diagnostics.cpp
+  src/start_request_serialization.cpp
 )
 target_link_libraries(integrationtest_scanner_api
   ${catkin_LIBRARIES}

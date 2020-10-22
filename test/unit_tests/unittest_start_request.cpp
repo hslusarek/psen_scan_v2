@@ -119,7 +119,7 @@ TEST_F(StartRequestTest, regressionForRealSystem)
       "192.168.0.50", 55115, 0, "192.168.0.10", DefaultScanRange(TenthOfDegree(0), TenthOfDegree(2750)), false);
   StartRequest sr(sc, 0);
 
-  auto data = sr.serialize();
+  auto data = serialize(sr);
 
   unsigned char expected_crc[4] = { 0xed, 0xc3, 0x48, 0xa1 };  // see wireshark for this number
 
@@ -135,7 +135,7 @@ TEST_F(StartRequestTest, regressionForRealSystemWithDiagnostic)
       "192.168.0.50", 55115, 0, "192.168.0.10", DefaultScanRange(TenthOfDegree(0), TenthOfDegree(2750)), true);
   StartRequest sr(sc, 0);
 
-  auto data = sr.serialize();
+  auto data = serialize(sr);
 
   unsigned char expected_crc[4] = { 0x5a, 0x50, 0x43, 0x8d };  // see wireshark for this number
 
