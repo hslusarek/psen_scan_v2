@@ -71,12 +71,12 @@ private:
   uint8_t speed_encoder_enabled_{ 0 }; /**< 0000000bin disabled, 00001111bin enabled.*/
   uint8_t diagnostics_enabled_{ 0b00000000 };
 
-  class DeviceField
+  class DeviceSettings
   {
   public:
-    DeviceField() = default;
+    DeviceSettings() = default;
 
-    DeviceField(const DefaultScanRange& scan_range, const TenthOfDegree resolution)
+    DeviceSettings(const DefaultScanRange& scan_range, const TenthOfDegree resolution)
       : scan_range_(scan_range), resolution_(resolution)
     {
     }
@@ -97,8 +97,8 @@ private:
     TenthOfDegree resolution_{ 0 };
   };
 
-  DeviceField master_;
-  std::array<DeviceField, 3> slaves_;
+  DeviceSettings master_;
+  std::array<DeviceSettings, 3> slaves_;
 };
 
 }  // namespace psen_scan_v2
